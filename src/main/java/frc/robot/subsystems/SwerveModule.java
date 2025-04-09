@@ -1,10 +1,14 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
+import frc.robot.Constants.SwerveConstants;
 
 public class SwerveModule {
   // Define the maximum velocity for scaling (in meters per second).
@@ -14,6 +18,8 @@ public class SwerveModule {
   private final SparkMax driveMotor;
   private final SparkMax turningMotor;
   private SwerveModuleState currentState;
+  private RelativeEncoder driveEncoder;
+  private RelativeEncoder turnEncoder;
 
   public SwerveModule(String name, int driveMotorID, int turningMotorID) {
     this.name = name;
@@ -21,6 +27,9 @@ public class SwerveModule {
     turningMotor = new SparkMax(turningMotorID, MotorType.kBrushless);
     // Initialize state to zero.
     currentState = new SwerveModuleState(0.0, new Rotation2d(0.0));
+
+    driveEncoder = driveMotor.getEncoder();
+    turnEncoder = turningMotor.getEncoder();
   }
 
   /**
@@ -60,5 +69,25 @@ public class SwerveModule {
   public void updateNetworkTable(NetworkTable table) {
     table.getEntry(name + "/angle").setDouble(currentState.angle.getDegrees());
     table.getEntry(name + "/velocity").setDouble(currentState.speedMetersPerSecond);
+  }
+
+  public SwerveModulePosition getPosition(){
+    return new SwerveModulePosition(getDriveMotorPosition(), new Rotation2d(getTurnMotorPosition()));
+  }
+
+  public double getDriveMotorPosition(){
+    return driveEncoder.getPosition() * SwerveConstants.DRIVE_MOTOR_PCONVERSION;
+  }
+
+  public double getTurnMotorPosition(){
+    return turnEncoder.getPosition() * SwerveConstants.TURN_MOTOR_PCONVERSION;
+  }
+
+  public SwerveModuleState getState(){
+    return new SwerveModuleState(getDriveMotorVelocity(), new Rotation2d(getTurnMotorPosition()));
+  }
+
+  public double getDriveMotorVelocity(){
+    return driveEncoder.getVelocity() * SwerveConstants.DRIVE_MOTOR_VCONVERSION;
   }
 }
