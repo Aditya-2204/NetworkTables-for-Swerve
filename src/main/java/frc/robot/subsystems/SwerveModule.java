@@ -9,6 +9,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import frc.robot.Constants.SwerveConstants;
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
 
 public class SwerveModule {
   // Define the maximum velocity for scaling (in meters per second).
@@ -66,9 +68,15 @@ public class SwerveModule {
    *
    * @param table The NetworkTable where the values will be published.
    */
-  public void updateNetworkTable(NetworkTable table) {
-    table.getEntry(name + "/angle").setDouble(currentState.angle.getDegrees());
-    table.getEntry(name + "/velocity").setDouble(currentState.speedMetersPerSecond);
+  public void updateNetworkTable(DataLog log) {
+    double moduleAngle = currentState.angle.getDegrees();
+    double moduleSpeed = currentState.speedMetersPerSecond*MAX_VELOCITY;
+
+    DoubleLogEntry moduleAngleLog = new DoubleLogEntry(log, name + "/angle");
+    DoubleLogEntry moduleSpeedLog = new DoubleLogEntry(log, name + "/speed");
+
+    moduleAngleLog.append(moduleAngle);
+    moduleSpeedLog.append(moduleSpeed);
   }
 
   public SwerveModulePosition getPosition(){
