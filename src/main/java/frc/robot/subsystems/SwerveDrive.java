@@ -4,6 +4,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.SwerveConstants;
 
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -20,9 +24,14 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+<<<<<<< HEAD
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+=======
+import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.wpilibj.DataLogManager;
+>>>>>>> ac3007a70e0f9c5d4069021329f50620d11d7884
 
 public class SwerveDrive extends SubsystemBase {
   private final SwerveModule leftFront;
@@ -32,18 +41,36 @@ public class SwerveDrive extends SubsystemBase {
   private final NetworkTable swerveTable;
   private Pigeon2 gyro;
   private RobotConfig config;
+<<<<<<< HEAD
   private final Field2d field = new Field2d();
 
 
 
+=======
+  private NetworkTableInstance inst;
+  private Field2d field;
+>>>>>>> ac3007a70e0f9c5d4069021329f50620d11d7884
 
   // Define the robot’s swerve geometry (module positions relative to center, in meters)
   private final SwerveDriveKinematics kinematics;
 
   private final SwerveDrivePoseEstimator poseEstimator;
-
+  private NetworkTableInstance Table;
+  DataLog log;
+  
+      
+    
   public SwerveDrive() {
-    this.swerveTable = NetworkTableInstance.getDefault().getTable("Swerve");
+    DataLogManager.start();
+    // Set up custom log entries
+    log = DataLogManager.getLog();
+
+
+
+    field = new Field2d();
+    this.Table = NetworkTableInstance.getDefault();
+    this.Table.startServer();
+    this.swerveTable = Table.getTable("SwerveDrive");
 
     Translation2d leftFrontLocation  = new Translation2d(0.25,  0.25);
     Translation2d rightFrontLocation = new Translation2d(0.25, -0.25);
@@ -65,7 +92,8 @@ public class SwerveDrive extends SubsystemBase {
       SwerveConstants.DRIVE_KINEMATICS,
       getHeadingRotation2d(),
       getModulePositions(),
-      new Pose2d());
+      new Pose2d()
+    );
 
       try{
         config = RobotConfig.fromGUISettings();
@@ -81,8 +109,8 @@ public class SwerveDrive extends SubsystemBase {
               this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
               (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
               new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                      new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                      new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                      new PIDConstants(1.0, 3.0, 4.0), // Translation PID constants
+                      new PIDConstants(2.0, 5.0, 8.0) // Rotation PID constants
               ),
               config, // The robot configuration
               () -> {
@@ -101,7 +129,6 @@ public class SwerveDrive extends SubsystemBase {
 
     SmartDashboard.putData("Field", field);
   }
-
   /**
    * Drive the robot using actual swerve kinematics.
    *
@@ -135,15 +162,24 @@ public class SwerveDrive extends SubsystemBase {
     field.setRobotPose(getPose());
 
     // Update the NetworkTable with module data.
-    leftFront.updateNetworkTable(swerveTable);
-    rightFront.updateNetworkTable(swerveTable);
-    leftBack.updateNetworkTable(swerveTable);
-    rightBack.updateNetworkTable(swerveTable);
+    leftFront.updateNetworkTable(log);
+    rightFront.updateNetworkTable(log);
+    leftBack.updateNetworkTable(log);
+    rightBack.updateNetworkTable(log);
 
 
 
     //Update pose estimator
     poseEstimator.update(getHeadingRotation2d(), getModulePositions());
+
+    if(RobotState.isAutonomous()) swerveTable.getEntry("Robot State").setString("Autonomous");
+    else if(RobotState.isTeleop()) swerveTable.getEntry("Robot State").setString("Teleop");
+    else if(RobotState.isDisabled()) swerveTable.getEntry("Robot State").setString("Disabled");
+    else if(RobotState.isTest()) swerveTable.getEntry("Robot State").setString("Test");
+    else swerveTable.getEntry("Robot State").setString("Unknown");
+    
+
+    System.out.println(poseEstimator.getEstimatedPosition().getX() + ", " + poseEstimator.getEstimatedPosition().getY() + ", " + poseEstimator.getEstimatedPosition().getRotation().getDegrees());
   }
   public Rotation2d getHeadingRotation2d(){
     return Rotation2d.fromDegrees(getHeading());
