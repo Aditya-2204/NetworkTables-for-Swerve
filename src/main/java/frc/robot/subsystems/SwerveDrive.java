@@ -20,6 +20,9 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 public class SwerveDrive extends SubsystemBase {
   private final SwerveModule leftFront;
@@ -29,6 +32,10 @@ public class SwerveDrive extends SubsystemBase {
   private final NetworkTable swerveTable;
   private Pigeon2 gyro;
   private RobotConfig config;
+  private final Field2d field = new Field2d();
+
+
+
 
   // Define the robot’s swerve geometry (module positions relative to center, in meters)
   private final SwerveDriveKinematics kinematics;
@@ -91,6 +98,8 @@ public class SwerveDrive extends SubsystemBase {
               },
               this // Reference to this subsystem to set requirements
       );
+
+    SmartDashboard.putData("Field", field);
   }
 
   /**
@@ -121,12 +130,19 @@ public class SwerveDrive extends SubsystemBase {
   }
   @Override
   public void periodic() {
+
+    // Update the Field2d with the current estimated pose
+    field.setRobotPose(getPose());
+
     // Update the NetworkTable with module data.
     leftFront.updateNetworkTable(swerveTable);
     rightFront.updateNetworkTable(swerveTable);
     leftBack.updateNetworkTable(swerveTable);
     rightBack.updateNetworkTable(swerveTable);
 
+
+
+    //Update pose estimator
     poseEstimator.update(getHeadingRotation2d(), getModulePositions());
   }
   public Rotation2d getHeadingRotation2d(){
