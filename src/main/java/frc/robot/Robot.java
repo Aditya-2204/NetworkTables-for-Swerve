@@ -4,12 +4,9 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-<<<<<<< HEAD
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
-=======
 import frc.robot.subsystems.SwerveDrive;
->>>>>>> ac3007a70e0f9c5d4069021329f50620d11d7884
 
 public class Robot extends TimedRobot {
   private RobotContainer robotContainer;

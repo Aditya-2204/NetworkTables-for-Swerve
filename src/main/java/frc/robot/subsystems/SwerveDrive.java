@@ -24,14 +24,8 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-<<<<<<< HEAD
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-=======
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.wpilibj.DataLogManager;
->>>>>>> ac3007a70e0f9c5d4069021329f50620d11d7884
 
 public class SwerveDrive extends SubsystemBase {
   private final SwerveModule leftFront;
@@ -41,29 +35,18 @@ public class SwerveDrive extends SubsystemBase {
   private final NetworkTable swerveTable;
   private Pigeon2 gyro;
   private RobotConfig config;
-<<<<<<< HEAD
-  private final Field2d field = new Field2d();
-
-
-
-=======
   private NetworkTableInstance inst;
   private Field2d field;
->>>>>>> ac3007a70e0f9c5d4069021329f50620d11d7884
 
   // Define the robot’s swerve geometry (module positions relative to center, in meters)
   private final SwerveDriveKinematics kinematics;
 
   private final SwerveDrivePoseEstimator poseEstimator;
   private NetworkTableInstance Table;
-  DataLog log;
   
       
     
   public SwerveDrive() {
-    DataLogManager.start();
-    // Set up custom log entries
-    log = DataLogManager.getLog();
 
 
 
@@ -162,10 +145,10 @@ public class SwerveDrive extends SubsystemBase {
     field.setRobotPose(getPose());
 
     // Update the NetworkTable with module data.
-    leftFront.updateNetworkTable(log);
-    rightFront.updateNetworkTable(log);
-    leftBack.updateNetworkTable(log);
-    rightBack.updateNetworkTable(log);
+    leftFront.updateNetworkTable(swerveTable);
+    rightFront.updateNetworkTable(swerveTable);
+    leftBack.updateNetworkTable(swerveTable);
+    rightBack.updateNetworkTable(swerveTable);
 
 
 
